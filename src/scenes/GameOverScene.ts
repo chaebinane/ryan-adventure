@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { GAME } from "../config";
+import { consume, resetAll } from "../virtualInput";
 
 export class GameOverScene extends Phaser.Scene {
   constructor() {
@@ -7,6 +8,7 @@ export class GameOverScene extends Phaser.Scene {
   }
 
   create() {
+    resetAll();
     this.cameras.main.setBackgroundColor("#000000");
     const score = this.registry.get("score") ?? 0;
 
@@ -20,10 +22,16 @@ export class GameOverScene extends Phaser.Scene {
       fontFamily: GAME.FONT, fontSize: "13px", color: "#aaaaaa",
     }).setOrigin(0.5);
 
-    this.input.keyboard!.on("keydown-ENTER", () => {
-      this.registry.set("score", 0);
-      this.registry.set("lives", 3);
-      this.scene.start("GameScene", { stageIndex: 0 });
-    });
+    this.input.keyboard!.on("keydown-ENTER", () => this.restart());
+  }
+
+  private restart() {
+    this.registry.set("score", 0);
+    this.registry.set("lives", 3);
+    this.scene.start("GameScene", { stageIndex: 0 });
+  }
+
+  update() {
+    if (consume("enter")) this.restart();
   }
 }

@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { GAME } from "../config";
+import { consume, resetAll } from "../virtualInput";
 
 export class HelpScene extends Phaser.Scene {
   constructor() {
@@ -7,6 +8,7 @@ export class HelpScene extends Phaser.Scene {
   }
 
   create() {
+    resetAll();
     this.add.image(0, 0, "menubg").setOrigin(0, 0).setAlpha(0.35);
     this.cameras.main.setBackgroundColor("#101018");
 
@@ -36,5 +38,9 @@ export class HelpScene extends Phaser.Scene {
     const back = () => this.scene.start("MenuScene");
     this.input.keyboard!.on("keydown-ENTER", back);
     this.input.keyboard!.on("keydown-ESC", back);
+  }
+
+  update() {
+    if (consume("enter")) this.scene.start("MenuScene");
   }
 }

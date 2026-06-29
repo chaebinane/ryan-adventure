@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { GAME, COLORS } from "../config";
+import { consume, resetAll } from "../virtualInput";
 
 // 원작 stage.StageMenu 포팅 + 완성도 보강.
 export class MenuScene extends Phaser.Scene {
@@ -12,6 +13,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create() {
+    resetAll();
     this.add.image(0, 0, "menubg").setOrigin(0, 0);
 
     this.add.text(GAME.WIDTH / 2, 64, "라이몽의 모험", {
@@ -33,6 +35,12 @@ export class MenuScene extends Phaser.Scene {
     kb.on("keydown-DOWN", () => this.move(1));
     kb.on("keydown-UP", () => this.move(-1));
     kb.on("keydown-ENTER", () => this.select());
+  }
+
+  update() {
+    if (consume("up")) this.move(-1);
+    if (consume("down")) this.move(1);
+    if (consume("enter")) this.select();
   }
 
   private move(dir: number) {

@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { setupTouchControls } from "./touch";
 import { GAME } from "./config";
 import { BootScene } from "./scenes/BootScene";
 import { MenuScene } from "./scenes/MenuScene";
@@ -31,3 +32,4 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 new Phaser.Game(config);
+setupTouchControls();

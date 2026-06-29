@@ -7,6 +7,7 @@ import { Slugger } from "../objects/Slugger";
 import { Explosion } from "../objects/Explosion";
 import { STAGES } from "../data/stages";
 import { CHARACTERS } from "../data/characters";
+import { vinput, consume, resetAll } from "../virtualInput";
 
 export class GameScene extends Phaser.Scene {
   private tileMap!: TileMap;
@@ -41,6 +42,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
+    resetAll();
     const stage = STAGES[this.stageIndex];
 
     // 배경(고정 하늘)
@@ -109,13 +111,20 @@ export class GameScene extends Phaser.Scene {
     this.accumulator += Math.min(delta, 100); // 큰 끊김 방지
 
     const heldInput = {
-      left: this.keyLeft.isDown,
-      right: this.keyRight.isDown,
-      glide: this.keyGlide.isDown,
+      left: this.keyLeft.isDown || vinput.left,
+      right: this.keyRight.isDown || vinput.right,
+      glide: this.keyGlide.isDown || vinput.glide,
     };
-    const jumpPressed = Phaser.Input.Keyboard.JustDown(this.keyJump);
-    const scratchPressed = Phaser.Input.Keyboard.JustDown(this.keyScratch);
-    const firePressed = Phaser.Input.Keyboard.JustDown(this.keyFire);
+    // consume()는 항상 호출되어야 큐가 비워지므로 JustDown과 분리해 평가한다.
+    const jumpKey = Phaser.Input.Keyboard.JustDown(this.keyJump);
+    const jumpTouch = consume("jump");
+    const scratchKey = Phaser.Input.Keyboard.JustDown(this.keyScratch);
+    const scratchTouch = consume("scratch");
+    const fireKey = Phaser.Input.Keyboard.JustDown(this.keyFire);
+    const fireTouch = consume("fire");
+    const jumpPressed = jumpKey || jumpTouch;
+    const scratchPressed = scratchKey || scratchTouch;
+    const firePressed = fireKey || fireTouch;
     let firstStep = true;
 
     while (this.accumulator >= step) {

@@ -1,10 +1,12 @@
 import Phaser from "phaser";
 import { GAME } from "../config";
 import { STAGES } from "../data/stages";
+import { consume, resetAll } from "../virtualInput";
 
 export class StageClearScene extends Phaser.Scene {
   private stageIndex = 0;
   private victory = false;
+  private confirm: () => void = () => {};
 
   constructor() {
     super("StageClearScene");
@@ -16,6 +18,7 @@ export class StageClearScene extends Phaser.Scene {
   }
 
   create() {
+    resetAll();
     this.cameras.main.setBackgroundColor("#0d0d14");
     const score = this.registry.get("score") ?? 0;
 
@@ -32,7 +35,8 @@ export class StageClearScene extends Phaser.Scene {
       this.add.text(GAME.WIDTH / 2, GAME.HEIGHT - 30, "Enter → 메뉴로", {
         fontFamily: GAME.FONT, fontSize: "12px", color: "#888888",
       }).setOrigin(0.5);
-      this.input.keyboard!.on("keydown-ENTER", () => this.scene.start("MenuScene"));
+      this.confirm = () => this.scene.start("MenuScene");
+      this.input.keyboard!.on("keydown-ENTER", this.confirm);
     } else {
       const cleared = STAGES[this.stageIndex].key;
       this.add.text(GAME.WIDTH / 2, 80, `스테이지 ${cleared} 클리어!`, {
@@ -44,13 +48,16 @@ export class StageClearScene extends Phaser.Scene {
       this.add.text(GAME.WIDTH / 2, 150, "Enter → 다음 스테이지", {
         fontFamily: GAME.FONT, fontSize: "13px", color: "#ffffff",
       }).setOrigin(0.5);
-      this.input.keyboard!.on("keydown-ENTER", () =>
-        this.scene.start("GameScene", { stageIndex: this.stageIndex + 1 })
-      );
+      this.confirm = () => this.scene.start("GameScene", { stageIndex: this.stageIndex + 1 });
+      this.input.keyboard!.on("keydown-ENTER", this.confirm);
       // 3초 후 자동 진행
       this.time.delayedCall(3000, () => {
         if (this.scene.isActive()) this.scene.start("GameScene", { stageIndex: this.stageIndex + 1 });
       });
     }
+  }
+
+  update() {
+    if (consume("enter")) this.confirm();
   }
 }
